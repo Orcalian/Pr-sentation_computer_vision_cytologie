@@ -1,27 +1,36 @@
-Je me présente Alexandre Claveau j'ai réalisé mon master a Gustave Roussy. J'ai ensuite poursuivi un an par le travail que je vais vous présenter. 
-
 # Diapositive 1 — Titre
 
+Madame, Monsieur,
 
-Ce travail porte sur **l'analyse des cellules sanguines** par computer vision, et est réalisé à l’Institut Gustave Roussy, au sein du laboratoire d’hématologie.
+Je vous remercie de me donner l’occasion de vous présenter les dernières
+avancées de
+mes travaux.
+
+Je me présente, je suis Alexandre Claveau. Je suis ingénieur en informatique
+actuellement mon travail porte sur l'analyse des images
+microscopiques de cytologie sanguine assistée par ordinateur.
 
 ---
-
 # Diapositive 2 — Plan
 
 La présentation est organisée en trois parties.
 
-Je commencerai par le **contexte clinique et l’état de l’art**, afin d’expliquer d’où viennent les images et pourquoi leur classification automatisé est un enjeu.
+Je commencerai par le **contexte clinique et l’état de l’art de l'analyse d'images cytologiques**, afin
+d’expliquer d’où viennent les images et pourquoi leur classification
+automatisée est un enjeu.
 
-Ensuite, je présenterai le **matériel et les méthodes**, avec les données, les modèles utilisés, les métriques et le clustering.
+Ensuite, je présenterai le **matériel et les méthodes**, avec les données,
+les modèles utilisés, les métriques et le clustering.
 
-Enfin, je présenterai les **résultats**, aussi bien pour la classification supervisée que pour l’exploration non supervisée.
+Enfin, je présenterai les **résultats**, aussi bien pour la classification
+supervisée que pour l’exploration non supervisée.
 
 ---
 
 # Diapositive 3 — Partie 1 : Introduction
 
-Je vais commencer par replacer ce travail dans son **contexte **, parce que c’est ce contexte qui motive la suite du projet.
+Je vais commencer par replacer ce travail dans son **contexte **, parce que
+c’est ce contexte qui motive la suite du projet.
 
 ---
 
@@ -29,36 +38,60 @@ Je vais commencer par replacer ce travail dans son **contexte **, parce que c’
 
 Gustave Roussy est le centre de référence européen en cancérologie.
 
-Dans le laboratoire d'hématologie, nous réalisons les  **numération formule sanguine, ou NFS** de l'ensemble des services de l'hôpital. C'est à dire environ **350 formules par jour**.
+Dans le laboratoire d'hématologie, nous réalisons les **numération formule
+sanguine, ou NFS** de l'ensemble des services de l'hôpital. C'est à dire
+environ **350 formules par jour**.
 
-Concrètement, les tubes de sang passent d’abord sur une **chaîne d’automates Sysmex**, qui réalise la cytométrie. Sur la base de **règles de déclenchement** configurer par le service,, une analyse cytologique peut être déclenché.
+Concrètement, les tubes de sang passent d’abord sur une **chaîne
+d’automates Sysmex**, qui réalise la cytométrie. Sur la base de **règles de
+déclenchement** configurer par le service,, une analyse cytologique peut être
+déclenché.
 
 Dans ce cas, on réalise un **frottis sanguin**, puis la lame est colorée.
 
-Cette lame va ensuite être analysée à l’aide d’un **microscope numérique** et scanné.
+Cette lame va ensuite être analysée à l’aide d’un **microscope
+numérique** et scanné.
 
-Le système va rechercher les cellules sur la lame, segmenter et réaliser une classification de chaque cellules. Cette classification pourra être validé ou non, d'abords par le technicien et puis en dernière instance par le biologiste.
+Le système va rechercher les cellules sur la lame, segmenter et réaliser une
+classification de chaque cellules. Cette classification pourra être validé ou
+non, d'abords par le technicien et puis en dernière instance par le biologiste.
 
 On peut donc résumer toute la chaîne de la manière suivante :
 
-**cytométrie réalisée sur la chaîne Sysmex, règles de déclenchement, réalisation du frottis, coloration, scan numérique, recherche des cellules, segmentation de chaque cellule et classification. Enfin révision de la classification par le technicien puis par le biologiste.**
+**cytométrie réalisée sur la chaîne Sysmex, règles de déclenchement,
+réalisation du frottis, coloration, scan numérique, recherche des cellules,
+segmentation de chaque cellule et classification. Enfin révision de la
+classification par le technicien puis par le biologiste.**
 
-C’est précisément sur les dernières étapes de cette chaîne que s’inscrit notre projet.
+C’est précisément sur les dernières étapes de cette chaîne que
+s’inscrit notre projet.
 
-L’enjeu est important parce que l’analyse cytologique représente une charge de travail importante et parce qu’elle repose encore en partie sur l’expertise du cytologiste.
-Ce reclassement reste sensible aux différences entre utilisateurs, surtout dans les cas où la cytologie de la cellule est atypique ou intermédiaire. L’objectif n’est donc pas seulement d’aller plus vite, mais également d’obtenir des outils **plus reproductibles et capables d’aider à détecter des populations inhabituelles**.
+L’enjeu est important parce que l’analyse cytologique représente une charge
+de travail importante et parce qu’elle repose encore en partie sur
+l’expertise du cytologiste.
+Ce reclassement reste sensible aux différences entre utilisateurs, surtout dans
+les cas où la cytologie de la cellule est atypique ou intermédiaire.
+L’objectif n’est donc pas seulement d’aller plus vite, mais également
+d’obtenir des outils **plus reproductibles et capables d’aider à détecter
+des populations inhabituelles**.
 
 ---
 
 # Diapositive 5 — Outils existants et préclassement du DI-60
 
-Dans notre process, le préclassement est réalisé par le logiciel de Cellavision. 
+Dans notre process, le préclassement est réalisé par le logiciel de
+Cellavision.
 
-Selon Oh Joo Keon dans une étude publié en 2021 dans la revue PLOS ONE, les niveaux de concordance avec le reclassement des biologistes, est d'environ 89 %.
+Selon Oh Joo Keon dans une étude publié en 2021 dans la revue PLOS ONE, les
+niveaux de concordance avec le reclassement des biologistes, est d'environ 89 %.
 
-Résultats qui peuvent baisser, notamment pour les populations cellulaires rares et,ou pathologiques. Ce qui est particulièrement pertinent dans un centre comme Gustave Roussy, où les traitements reçus par les patients peuvent entraîner d’importantes modifications de la cytologie cellulaire.
+Résultats qui peuvent baisser, notamment pour les populations cellulaires rares
+et,ou pathologiques. Ce qui est particulièrement pertinent dans un centre comme
+Gustave Roussy, où les traitements reçus par les patients peuvent entraîner
+d’importantes modifications de la cytologie cellulaire.
 
-On comprend donc pourquoi il reste intéressant de développer des modèles adaptés à nos propres données.
+On comprend donc pourquoi il reste intéressant de développer des modèles
+adaptés à nos propres données.
 
 ---
 
@@ -68,79 +101,116 @@ On comprend donc pourquoi il reste intéressant de développer des modèles adap
 
 Le premier concerne la **classification supervisée**.
 
-L’idée est d’entraîner un modèle sur des cellules déjà annotées et de voir si nous pouvons atteindre, voire dépasser, les performances du logiciel de Cellavision.
+L’idée est d’entraîner un modèle sur des cellules déjà annotées et de
+voir si nous pouvons atteindre, voire dépasser, les performances du logiciel de
+Cellavision.
 
 Le deuxième objectif concerne l'exploration cytologique.
 
-Nous voulons également explorer les cellules **sans imposer au départ une classe connue**.
+Nous voulons également explorer les cellules **sans imposer au départ une
+classe connue**.
 
-L’objectif devient alors de chercher des regroupements de cellules cytologiquement proches.
+L’objectif devient alors de chercher des regroupements de cellules
+cytologiquement proches.
 
-Cette approche pourrait être intéressante pour repérer des populations rares, pathologiques ou d'intérêt clinique, qui ne correspondent pas forcément aux catégories classiques utilisées pour la classification supervisée.
+Cette approche pourrait être intéressante pour repérer des populations rares,
+pathologiques ou d'intérêt clinique, qui ne correspondent pas forcément aux
+catégories classiques utilisées pour la classification supervisée.
 
 ---
 
 # Diapositive 7 — État de l’art : segmentation et CNN
 
-Avant de développer nos modèles, nous avons regardé ce qui existait dans la littérature. Le logiciel de Cellavision utilisant un CNN nous avons commencer par explorer l'état de l'art concernant les cnn. 
+Avant de développer nos modèles, nous avons regardé ce qui existait dans la
+littérature. Le logiciel de Cellavision utilisant un CNN nous avons commencer
+par explorer l'état de l'art concernant les cnn.
 
-D'après Sohag Kumar Mondal, dans ces résultats puplié en 2025 dans Scientific Reports, utilise un U-Net pour segmenter les cellules, puis un CNN léger pour classifier les cellules.
+D'après Sohag Kumar Mondal, dans ces résultats puplié en 2025 dans Scientific
+Reports, utilise un U-Net pour segmenter les cellules, puis un CNN léger pour
+classifier les cellules.
 
-Ils obtiennent environ **97,1 % de F1-score**, sur un dataset composer de neuf types cellulaires.
+Ils obtiennent environ **97,1 % de F1-score**, sur un dataset composer de neuf
+types cellulaires.
 
 ---
 
 # Diapositive 8 — De l’image à la représentation numérique
 
-Pour comprendre la suite, il faut introduire une notion importante : **l’embedding**.
+Pour comprendre la suite, il faut introduire une notion importante :
+**l’embedding**.
 
-Lorsque l’on donne une image de cellule à un réseau neuronal, le modèle ne manipule pas directement des concepts comme « noyau », « cytoplasme » ou « granulations ».
+Lorsque l’on donne une image de cellule à un réseau neuronal, le modèle ne
+manipule pas directement des concepts comme « noyau », « cytoplasme » ou «
+granulations ».
 
 Il transforme l’image en une suite de nombres.
 
 Ce vecteur numérique est ce qu’on appelle un **embedding**.
 
-Deux cellules qui ont des caractéristiques visuelles proches devraient théoriquement avoir des embeddings proches.
+Deux cellules qui ont des caractéristiques visuelles proches devraient
+théoriquement avoir des embeddings proches.
 
 À partir de là, on peut faire deux choses.
 
-Si nous avons des annotations, nous pouvons utiliser ces annotations pour apprendre au modèles à associer un embedding à une classe.
+Si nous avons des annotations, nous pouvons utiliser ces annotations pour
+apprendre au modèles à associer un embedding à une classe.
 
-Mais même sans annotation, nous pouvons regarder quelles cellules se ressemblent et essayer de faire apparaître des groupes.
+Mais même sans annotation, nous pouvons regarder quelles cellules se
+ressemblent et essayer de faire apparaître des groupes.
 
 ---
 
 # Diapositive 9 — Vision Transformer
 
-Une autre famille de modèles particulièrement performante et plus récente que celle des cnn est celle des **Vision Transformers**.
+Une autre famille de modèles particulièrement performante et plus récente que
+celle des cnn est celle des **Vision Transformers**.
 
-Selon Shuwen Chen dans son article paru en 2023 dans electronics, un Vision Transformer appliqué à quatre classes de cellules sanguines atteint environ **98 % de F1-score**.
+Selon Shuwen Chen dans son article paru en 2023 dans electronics, un Vision
+Transformer appliqué à quatre classes de cellules sanguines atteint environ
+**98 % de F1-score**.
 
-La différence des deux datasets dans les articles présentés, demanderas de comparer nous-mêmes un CNN classique à une architecture de type Vision Transformer sur un même dataset.
+La différence des deux datasets dans les articles présentés, demanderas de
+comparer nous-mêmes un CNN classique à une architecture de type Vision
+Transformer sur un même dataset.
 
 ---
 
 # Diapositive 10 — DinoBloom
 
-Une autre approche particulièrement intéressante pour notre projet est le modèle présenté par Valentin Koch en 2024 dans Medical Image Computing and Computer Assisted Intervention. Le modèle a été entraîné sur plus de **380 000 images**, provenant de 13 jeux de données de sang périphérique et de moelle.
+Une autre approche particulièrement intéressante pour notre projet est le
+modèle présenté par Valentin Koch en 2024 dans Medical Image Computing and
+Computer Assisted Intervention. Le modèle a été entraîné sur plus de **380
+000 images**, provenant de 13 jeux de données de sang périphérique et de
+moelle.
 
-La différence importante ici est que l'objectif n'est plus uniquement de prédire directement une classe.
+La différence importante ici est que l'objectif n'est plus uniquement de
+prédire directement une classe.
 
-Le modèle apprend surtout à produire de bonnes **représentations numériques des cellules**.
+Le modèle apprend surtout à produire de bonnes **représentations numériques
+des cellules**.
 
-C'est particulièrement intéressant pour notre deuxième objectif : explorer de grandes quantités de cellules sans devoir toutes les annoter manuellement.
+C'est particulièrement intéressant pour notre deuxième objectif : explorer de
+grandes quantités de cellules sans devoir toutes les annoter manuellement.
 
 ---
 
 # Diapositive 11 — Apprentissage auto-supervisé
 
-le principe de l’**apprentissage auto-supervisé**, est d’apprendre à partir des images elles-mêmes sans avoir besoin de fournir une classe à chaque cellule. les modèles utilisent principalement deux méthodes pour cela. 
+le principe de l’**apprentissage auto-supervisé**, est d’apprendre à
+partir des images elles-mêmes sans avoir besoin de fournir une classe à chaque
+cellule. les modèles utilisent principalement deux méthodes pour cela.
 
-Dans une approche de type Student–Teacher, on présente l'image globale à un modèle et des versions différentes de cette même image (crop, zoom, etc..) à un modèle similaires. le but étant que les embeddings convergent. 
+Dans une approche de type Student–Teacher, on présente l'image globale à un
+modèle et des versions différentes de cette même image (crop, zoom, etc..) à
+un modèle similaires. le but étant que les embeddings convergent.
 
-Dans la deuxième approche, iBOT, on présente l'image globale à un modèle et des versions de cette même image ou une partie de l’image est masquée et le modèle doit apprendre à prédire les représentations des patches manquants.
+Dans la deuxième approche, iBOT, on présente l'image globale à un modèle et
+des versions de cette même image ou une partie de l’image est masquée et le
+modèle doit apprendre à prédire les représentations des patches manquants.
 
-À la fin de cet entraînement, nous disposons d’un modèle capable de transformer chaque cellule en un vecteur qui résume son information cytologique.
+À la fin de cet entraînement, nous disposons d’un modèle capable de
+transformer chaque cellule en un vecteur qui résume son information
+cytologique.
 
 ---
 
@@ -148,17 +218,24 @@ Dans la deuxième approche, iBOT, on présente l'image globale à un modèle et 
 
 Une fois que nous avons les embeddings, il reste encore une question :
 
-**comment identifier automatiquement les différents groupes présents dans ces millions de cellules ?**
+**comment identifier automatiquement les différents groupes présents dans ces
+millions de cellules ?**
 
-Une des approches étudiées par Son Le Thanh dans un article datant de 2024 et publié dans les actes de la conférence IEEE Topological Data Analysis and Visualization est le complexe de **Morse-Smale**.
+Une des approches étudiées par Son Le Thanh dans un article datant de 2024 et
+publié dans les actes de la conférence IEEE Topological Data Analysis and
+Visualization est le complexe de **Morse-Smale**.
 
-L’idée est de considérer la distribution des cellules comme un paysage de densité.
+L’idée est de considérer la distribution des cellules comme un paysage de
+densité.
 
-Certaines zones contiennent beaucoup de cellules et forment des pics de densité.
+Certaines zones contiennent beaucoup de cellules et forment des pics de
+densité.
 
-Morse-Smale permet de découper ce paysage en différentes régions autour de ces pics.
+Morse-Smale permet de découper ce paysage en différentes régions autour de
+ces pics.
 
-L'intérêt est d'obtenir des clusters qui suivent la structure du nuage de points plutôt que d’imposer à l’avance un nombre arbitraire de groupes.
+L'intérêt est d'obtenir des clusters qui suivent la structure du nuage de
+points plutôt que d’imposer à l’avance un nombre arbitraire de groupes.
 
 ---
 
@@ -166,21 +243,27 @@ L'intérêt est d'obtenir des clusters qui suivent la structure du nuage de poin
 
 Pour résumer cette première partie :
 
-nous partons d’un contexte clinique avec un volume important de cellules à analyser et une variabilité cytologique parfois importante.
+nous partons d’un contexte clinique avec un volume important de cellules à
+analyser et une variabilité cytologique parfois importante.
 
-Les outils actuels proposent déjà un pré-classement, mais nécessitent toujours une validation humaine.
+Les outils actuels proposent déjà un pré-classement, mais nécessitent
+toujours une validation humaine.
 
 Notre projet combine donc deux approches :
 
-une **classification supervisée**, pour reconnaître les catégories déjà connues de manière plus fiable,
+une **classification supervisée**, pour reconnaître les catégories déjà
+connues de manière plus fiable,
 
-et une **exploration des embeddings**, pour rechercher des organisations cytologiques ou des populations qui pourraient être plus difficiles à identifier avec une classification classique.
+et une **exploration des embeddings**, pour rechercher des organisations
+cytologiques ou des populations qui pourraient être plus difficiles à
+identifier avec une classification classique.
 
 ---
 
 # Diapositive 14 — Partie 2 : Matériel et méthodes
 
-Je vais maintenant présenter les données utilisées et les différentes étapes de notre pipeline.
+Je vais maintenant présenter les données utilisées et les différentes
+étapes de notre pipeline.
 
 ---
 
@@ -188,15 +271,20 @@ Je vais maintenant présenter les données utilisées et les différentes étape
 
 Nous avons travaillé avec plusieurs échelles de données.
 
-Pour la classification supervisée, nous disposons de **3 570 images annotées**, réparties en neuf classes.
+Pour la classification supervisée, nous disposons de **3 570 images
+annotées**, réparties en neuf classes.
 
 2 856 images sont utilisées pour l’entraînement et 714 pour la validation.
 
-Pour l’exploration des embeddings, nous avons ensuite travaillé sur environ **382 000 images**.
+Pour l’exploration des embeddings, nous avons ensuite travaillé sur environ
+**382 000 images**.
 
-Enfin, nous avons appliqué notre approche à très grande échelle sur **14 857 464 cellules**, soit environ 15 millions d’images.
+Enfin, nous avons appliqué notre approche à très grande échelle sur **14 857
+464 cellules**, soit environ 15 millions d’images.
 
-Cela nous permet de passer d’une problématique classique de classification sur quelques milliers d’images à une véritable exploration de population sur plusieurs millions de cellules.
+Cela nous permet de passer d’une problématique classique de classification
+sur quelques milliers d’images à une véritable exploration de population sur
+plusieurs millions de cellules.
 
 ---
 
@@ -204,25 +292,32 @@ Cela nous permet de passer d’une problématique classique de classification su
 
 Plusieurs modèles ont été évalués.
 
-Pour la partie supervisée, nous comparons un **ResNet-50**, qui est un CNN, et un **ViT-B/16**, qui est un Vision Transformer.
+Pour la partie supervisée, nous comparons un **ResNet-50**, qui est un CNN, et
+un **ViT-B/16**, qui est un Vision Transformer.
 
-Pour la partie non supervisée, nous utilisons **DINOv2** et **DINOv3** afin d’extraire les embeddings.
+Pour la partie non supervisée, nous utilisons **DINOv2** et **DINOv3** afin
+d’extraire les embeddings.
 
 ---
 
 # Diapositive 17 — Segmentation
  
-Pour la partie non supervisé, après l'étape d'explorations, nous avons rajouté une étape de **segmentation**.
+Pour la partie non supervisé, après l'étape d'explorations, nous avons
+rajouté une étape de **segmentation**.
 
-Le problème est que l’image contient à la fois la cellule et son environnement.
+Le problème est que l’image contient à la fois la cellule et son
+environnement.
 
-Or nous souhaitons que le modèle se concentre principalement sur la cytologie de la cellule.
+Or nous souhaitons que le modèle se concentre principalement sur la cytologie
+de la cellule.
 
-La segmentation permet donc d’isoler la cellule et de mettre le fond entièrement noir.
+La segmentation permet donc d’isoler la cellule et de mettre le fond
+entièrement noir.
 
 Dans notre pipeline, cette étape est réalisée avec **SAM 4**.
 
-On obtient ainsi une image où le signal utilisé pour produire l’embedding provient principalement de la cellule elle-même.
+On obtient ainsi une image où le signal utilisé pour produire l’embedding
+provient principalement de la cellule elle-même.
 
 ---
 
@@ -232,49 +327,74 @@ Pour évaluer la classification, nous possédons plusieurs métriques.
 
 L’accuracy nous indique la proportion totale de prédictions correctes.
 
-Mais lorsqu’une population est rare, une bonne accuracy globale peut masquer de mauvaises performances sur cette population.
+Mais lorsqu’une population est rare, une bonne accuracy globale peut masquer
+de mauvaises performances sur cette population.
 
-Nous regardons donc également le **recall**, qui mesure la capacité du modèle à retrouver les cellules appartenant réellement à une classe, la **précision**,qui évalue la proportion de prédictions correctes dans cette classe, et enfin le **F1-score**, qui réalise un compromis entre précision et recall.
+Nous regardons donc également le **recall**, qui mesure la capacité du modèle
+à retrouver les cellules appartenant réellement à une classe, la
+**précision**,qui évalue la proportion de prédictions correctes dans cette
+classe, et enfin le **F1-score**, qui réalise un compromis entre précision et
+recall.
 
-Dans cette présentation, nous privilégierons la métrique du F1-score qui a l'avantage de donner une vision générale des résultats de nos modèles. 
+Dans cette présentation, nous privilégierons la métrique du F1-score qui a
+l'avantage de donner une vision générale des résultats de nos modèles.
 
-Nous analysons également les matrices de confusion afin de comprendre précisément quelles populations sont confondues et aussi repérer les endroits ou le manque de population met rend tout analyse caduques.
+Nous analysons également les matrices de confusion afin de comprendre
+précisément quelles populations sont confondues et aussi repérer les endroits
+ou le manque de population met rend tout analyse caduques.
 
 ---
 
 # Diapositive 19 — Rang effectif
 
-Pour évaluer l'apprentissage non supervisé, nous nous sommes intéressés a **l'effective rank des embeddings**.
+Pour évaluer l'apprentissage non supervisé, nous nous sommes intéressés a
+**l'effective rank des embeddings**.
 
-Cette métrique nous indique comment l’information est répartie entre les différentes dimensions du vecteur.
+Cette métrique nous indique comment l’information est répartie entre les
+différentes dimensions du vecteur.
 
-Si le rang effectif est faible, cela signifie que l’information est très concentrée dans quelques directions.
+Si le rang effectif est faible, cela signifie que l’information est très
+concentrée dans quelques directions.
 
-S’il est plus élevé, l’information est répartie sur davantage de dimensions.
+S’il est plus élevé, l’information est répartie sur davantage de
+dimensions.
 
-Il faut cependant être prudent : un rang effectif élevé ne signifie pas automatiquement que la classification sera meilleure.
+Il faut cependant être prudent : un rang effectif élevé ne signifie pas
+automatiquement que la classification sera meilleure.
 
-C’est surtout un indicateur de la richesse et de la répartition de la représentation.
+C’est surtout un indicateur de la richesse et de la répartition de la
+représentation.
 
 ---
 
 # Diapositive 20 — UMAP
 
-Les embeddings possèdent plusieurs centaines, voire plusieurs milliers de dimensions.
+Les embeddings possèdent plusieurs centaines, voire plusieurs milliers de
+dimensions.
 
 Il est donc impossible de les visualiser directement.
 
-Nous utilisons pour cela **UMAP**. L'Umap est une méthode pour produire une représentation 2D à partir de représentation initialement en 2048D.  
+Nous utilisons pour cela **UMAP**. L'Umap est une méthode pour produire une
+représentation 2D à partir de représentation initialement en 2048D.
 
 UMAP cherche principalement à préserver les voisinages locaux.
 
-Autrement dit, si deux cellules sont proches dans l’espace des embeddings, UMAP va essayer de les maintenir proches dans la représentation en deux dimensions.
+Autrement dit, si deux cellules sont proches dans l’espace des embeddings,
+UMAP va essayer de les maintenir proches dans la représentation en deux
+dimensions.
 
-L'autre intérêt de l'Umap est de prendre en compte les différence de densité dans un même espace. On obtient finalement une carte où chaque point représente une cellule.
+L'autre intérêt de l'Umap est de prendre en compte les différence de densité
+dans un même espace. On obtient finalement une carte où chaque point
+représente une cellule.
 
-Cette carte est extrêmement utile pour l’exploration, mais il faut garder à l’esprit qu’une projection 2D reste une simplification de l’espace initial.
+Cette carte est extrêmement utile pour l’exploration, mais il faut garder à
+l’esprit qu’une projection 2D reste une simplification de l’espace
+initial.
 
-Enfin, nous pouvons mettre en regard la représentation obtenue avec UMAP et l’**effective rank**, en faisant l’hypothèse qu’un effective rank plus élevé correspond à une meilleure séparation des différents clusters dans l’espace UMAP.
+Enfin, nous pouvons mettre en regard la représentation obtenue avec UMAP et
+l’**effective rank**, en faisant l’hypothèse qu’un effective rank plus
+élevé correspond à une meilleure séparation des différents clusters dans
+l’espace UMAP.
 
 ---
 
@@ -288,13 +408,17 @@ Premièrement, nous projetons les embeddings avec UMAP.
 
 Deuxièmement, nous estimons la densité du nuage de points.
 
-Troisièmement, Morse-Smale découpe cette densité en régions autour des différents pics.
+Troisièmement, Morse-Smale découpe cette densité en régions autour des
+différents pics.
 
-Quatrièmement, la notion de **persistance** permet d'éliminer les structures trop petites ou trop instables.
+Quatrièmement, la notion de **persistance** permet d'éliminer les structures
+trop petites ou trop instables.
 
 Et enfin, chaque cellule est attribuée à une région.
 
-L’idée est donc de passer d’une carte comportant plusieurs millions de points à un nombre limité de régions que l’on peut ensuite examiner avec les cytologistes.
+L’idée est donc de passer d’une carte comportant plusieurs millions de
+points à un nombre limité de régions que l’on peut ensuite examiner avec
+les cytologistes.
 
 ---
 
@@ -306,11 +430,14 @@ nous utilisons environ 3 570 cellules annotées pour comparer ResNet et ViT.
 
 DINOv2 et DINOv3 permettent ensuite d’obtenir des embeddings.
 
-Après exploration, on rajoute une étape de segmentation pour isoler la cellule, avant l’extraction des représentations.
+Après exploration, on rajoute une étape de segmentation pour isoler la
+cellule, avant l’extraction des représentations.
 
-Ces embeddings sont projetés avec UMAP, puis la carte est découpée en régions grâce à Morse-Smale.
+Ces embeddings sont projetés avec UMAP, puis la carte est découpée en
+régions grâce à Morse-Smale.
 
-Nous avons ainsi un pipeline qui va de l’image individuelle jusqu’à l’exploration de plusieurs millions de cellules.
+Nous avons ainsi un pipeline qui va de l’image individuelle jusqu’à
+l’exploration de plusieurs millions de cellules.
 
 ---
 
@@ -318,17 +445,21 @@ Nous avons ainsi un pipeline qui va de l’image individuelle jusqu’à l’exp
 
 Je vais maintenant présenter les principaux résultats.
 
-Je commencerai par la classification supervisée avant de passer à l’exploration des embeddings.
+Je commencerai par la classification supervisée avant de passer à
+l’exploration des embeddings.
 
 ---
 
 # Diapositive 24 — Ressources de calcul supervisé
 
-Pour les modèles supervisés, ResNet-50 a été entraîné sur une A100, avec un temps de calcul d’environ 30 minutes.
+Pour les modèles supervisés, ResNet-50 a été entraîné sur une A100, avec
+un temps de calcul d’environ 30 minutes.
 
-Le ViT-B/16 a été entraîné sur une H100 et le temps de calcul reporté est d’environ deux minutes.
+Le ViT-B/16 a été entraîné sur une H100 et le temps de calcul reporté est
+d’environ deux minutes.
 
-Ces différences sont à interpréter en tenant compte des configurations utilisées, notamment des tailles de batch.
+Ces différences sont à interpréter en tenant compte des configurations
+utilisées, notamment des tailles de batch.
 
 ---
 
@@ -336,11 +467,13 @@ Ces différences sont à interpréter en tenant compte des configurations utilis
 
 Pour le ResNet-50, nous obtenons une **accuracy de 96,92 %**.
 
-La précision pondérée est de 97,22 %, le rappel de 96,92 % et le F1-score de 96,93 %.
+La précision pondérée est de 97,22 %, le rappel de 96,92 % et le F1-score de
+96,93 %.
 
 Les performances globales sont donc très bonnes.
 
-Mais comme expliqué précédemment, il faut compléter ces chiffres par l’étude des classes individuelles et de la matrice de confusion.
+Mais comme expliqué précédemment, il faut compléter ces chiffres par
+l’étude des classes individuelles et de la matrice de confusion.
 
 ---
 
@@ -350,9 +483,12 @@ Ici, nous pouvons regarder plus précisément les erreurs du modèle.
 
 La diagonale correspond aux cellules correctement classées.
 
-Les valeurs situées en dehors de la diagonale permettent d’identifier les populations que le modèle confond.
+Les valeurs situées en dehors de la diagonale permettent d’identifier les
+populations que le modèle confond.
 
-Il faut également noter que la classe « myélémie » ne comporte aucun cas dans ce jeu de validation, ce qui empêche d’en évaluer réellement les performances.
+Il faut également noter que la classe « myélémie » ne comporte aucun cas
+dans ce jeu de validation, ce qui empêche d’en évaluer réellement les
+performances.
 
 ---
 
@@ -362,11 +498,14 @@ Avec le Vision Transformer, nous obtenons de meilleures performances.
 
 L’accuracy atteint **98,32 %**.
 
-La précision pondérée est de 98,27 %, le rappel de 98,32 % et le F1-score de 98,26 %.
+La précision pondérée est de 98,27 %, le rappel de 98,32 % et le F1-score de
+98,26 %.
 
-Par rapport au ResNet, nous gagnons donc environ **1,4 point d’accuracy** et 1,33 point de F1 pondéré.
+Par rapport au ResNet, nous gagnons donc environ **1,4 point d’accuracy** et
+1,33 point de F1 pondéré.
 
-Sur notre jeu de données, le Vision Transformer est donc le modèle supervisé le plus performant.
+Sur notre jeu de données, le Vision Transformer est donc le modèle supervisé
+le plus performant.
 
 ---
 
@@ -374,11 +513,16 @@ Sur notre jeu de données, le Vision Transformer est donc le modèle supervisé 
 
 La matrice de confusion confirme les bonnes performances globales du ViT.
 
-Mais, là encore, l’intérêt principal est d’identifier les erreurs résiduelles.
+Mais, là encore, l’intérêt principal est d’identifier les erreurs
+résiduelles.
 
-Dans une application clinique, une erreur entre deux cellules très proches cytologiquement n’a pas forcément la même importance qu’une confusion entre deux populations dont la signification biologique est complètement différente.
+Dans une application clinique, une erreur entre deux cellules très proches
+cytologiquement n’a pas forcément la même importance qu’une confusion
+entre deux populations dont la signification biologique est complètement
+différente.
 
-La matrice de confusion doit donc toujours être interprétée en lien avec la cytologie.
+La matrice de confusion doit donc toujours être interprétée en lien avec la
+cytologie.
 
 ---
 
@@ -390,7 +534,9 @@ DINOv2 produit ici des représentations de dimension 1 024.
 
 Pour DINOv3, la représentation exportée est de dimension 2 048.
 
-Enfin, le traitement du grand corpus d’environ 15 millions d’images représente environ **35 heures de calcul** dans la configuration présentée contre 2H pour le même modèle avec environ 380 000 images..
+Enfin, le traitement du grand corpus d’environ 15 millions d’images
+représente environ **35 heures de calcul** dans la configuration présentée
+contre 2H pour le même modèle avec environ 380 000 images..
 
 ---
 
@@ -402,9 +548,12 @@ Pour DINOv3 sur environ 380 000 cellules, nous obtenons 441,8.
 
 Et sur le grand corpus, cette valeur atteint 742,2.
 
-L’information semble donc beaucoup plus répartie entre les dimensions avec DINOv3.
+L’information semble donc beaucoup plus répartie entre les dimensions avec
+DINOv3.
 
-Maintenant nous allons pouvoir observer si cette augmentation s’accompagne également d’une UMAP visuellement plus structurée avec des cluster plus nettement séparés.
+Maintenant nous allons pouvoir observer si cette augmentation s’accompagne
+également d’une UMAP visuellement plus structurée avec des cluster plus
+nettement séparés.
 
 ---
 
@@ -412,11 +561,14 @@ Maintenant nous allons pouvoir observer si cette augmentation s’accompagne ég
 
 Voici maintenant la projection UMAP obtenue avec DINOv2 adapté.
 
-Lorsque nous projetons les cellules annotées, nous observons que plusieurs classes restent assez fortement mélangées.
+Lorsque nous projetons les cellules annotées, nous observons que plusieurs
+classes restent assez fortement mélangées.
 
 Les neutrophiles matures, par exemple, recouvrent plusieurs populations.
 
-La carte est donc exploitable pour visualiser les données, mais elle ne fait pas apparaître immédiatement des groupes cytologiques très clairement séparés.
+La carte est donc exploitable pour visualiser les données, mais elle ne fait
+pas apparaître immédiatement des groupes cytologiques très clairement
+séparés.
 
 ---
 
@@ -424,13 +576,17 @@ La carte est donc exploitable pour visualiser les données, mais elle ne fait pa
 
 Avec DINOv3, la situation devient plus intéressante.
 
-Visuellement, plusieurs populations occupent des zones plus distinctes et l’organisation générale de la carte paraît plus structurée.
+Visuellement, plusieurs populations occupent des zones plus distinctes et
+l’organisation générale de la carte paraît plus structurée.
 
-Il faut ajouter que nous avons découvert que plusieurs classes convergeait vers une zone où la seule caractéristique commune était les globules rouges. 
+Il faut ajouter que nous avons découvert que plusieurs classes convergeait vers
+une zone où la seule caractéristique commune était les globules rouges.
 
-Ce qui nous as amené a mettre en place le masquage du fond pour obliger le modèle a se concentrer sur les cellules ayant un noyau. 
+Ce qui nous as amené a mettre en place le masquage du fond pour obliger le
+modèle a se concentrer sur les cellules ayant un noyau.
 
-Cette meilleure organisation de l’espace nous encourage à réentraîner le modèle avec plus de donné et le masquage du fond.
+Cette meilleure organisation de l’espace nous encourage à réentraîner le
+modèle avec plus de donné et le masquage du fond.
 
 ---
 
@@ -438,11 +594,14 @@ Cette meilleure organisation de l’espace nous encourage à réentraîner le mo
 
 Ici, l’exploration porte sur **14,86 millions de cellules**.
 
-Ce changement d’échelle ainsi que le masquage du fond, apporte une meilleur séparation des clusters..
+Ce changement d’échelle ainsi que le masquage du fond, apporte une meilleur
+séparation des clusters..
 
-Ce résultat suggère que la représentation stocke désormais des informations qui permettent de différencier naturellement les cellules.
+Ce résultat suggère que la représentation stocke désormais des informations
+qui permettent de différencier naturellement les cellules.
 
-Et surtout on voit que la structuration de l'Umap suit la progression de l'effective Rank. 
+Et surtout on voit que la structuration de l'Umap suit la progression de
+l'effective Rank.
 
 ---
 
@@ -450,15 +609,19 @@ Et surtout on voit que la structuration de l'Umap suit la progression de l'effec
 
 Nous appliquons ensuite Morse-Smale sur la densité dans la projection UMAP.
 
-Avec un seuil de persistance de 0,01, nous obtenons environ **60 régions candidates** sur les quelque 15 millions de cellules.
+Avec un seuil de persistance de 0,01, nous obtenons environ **60 régions
+candidates** sur les quelque 15 millions de cellules.
 
 Chaque cellule se retrouve donc attribuée à une région.
 
-Sur la carte, les zones orange et rouges correspondent aux zones de forte densité, et les contours délimitent les différentes régions.
+Sur la carte, les zones orange et rouges correspondent aux zones de forte
+densité, et les contours délimitent les différentes régions.
 
-À ce stade, il est très important de parler de **clusters candidats** et non de nouvelles populations biologiques.
+À ce stade, il est très important de parler de **clusters candidats** et non
+de nouvelles populations biologiques.
 
-Chaque région doit maintenant être examinée par des cytologistes afin de déterminer ce qu’elle contient réellement.
+Chaque région doit maintenant être examinée par des cytologistes afin de
+déterminer ce qu’elle contient réellement.
 
 ---
 
@@ -466,36 +629,55 @@ Chaque région doit maintenant être examinée par des cytologistes afin de dét
 
 Pour synthétiser les résultats :
 
-sur la partie supervisée, le **ViT-B/16 est le modèle le plus performant**, avec 98,32 % de F1-score.
+sur la partie supervisée, le **ViT-B/16 est le modèle le plus performant**,
+avec 98,32 % de F1-score.
 
-Sur la partie non supervisée, DINOv3 produit une représentation plus structurée avec des clusters mieux séparé que celle obtenue avec DINOv2.
+Sur la partie non supervisée, DINOv3 produit une représentation plus
+structurée avec des clusters mieux séparé que celle obtenue avec DINOv2.
 
-Cette modification de la représentation suit l'augmentation de l'effective rank.
+Cette modification de la représentation suit l'augmentation de l'effective
+rank.
 
-Et le clustering Morse-Smale permet ensuite de réduire cette immense quantité de données à environ 60 régions candidates.
+Et le clustering Morse-Smale permet ensuite de réduire cette immense quantité
+de données à environ 60 régions candidates.
 
-Nous passons donc d’environ 15 millions de cellules individuelles à quelques dizaines de groupes que les cytologistes peuvent examiner de manière ciblée.
+Nous passons donc d’environ 15 millions de cellules individuelles à quelques
+dizaines de groupes que les cytologistes peuvent examiner de manière ciblée.
 
 ---
 
 # Diapositive 36 — Conclusion générale
 
-Pour conclure, ce travail montre d’abord que les modèles de Vision Transformer sont très performants pour la classification supervisée de nos images cellulaires.
+Pour conclure, ce travail montre d’abord que les modèles de Vision
+Transformer sont très performants pour la classification supervisée de nos
+images cellulaires.
 
-Mais l’aspect qui le plus intéressant est la possibilité d’aller au-delà des classes déjà connues.
+Mais l’aspect qui le plus intéressant est la possibilité d’aller au-delà
+des classes déjà connues.
 
-Grâce aux modèles auto-supervisés, chaque cellule peut être représentée par un embedding.
+Grâce aux modèles auto-supervisés, chaque cellule peut être représentée
+par un embedding.
 
-UMAP permet ensuite de cartographier ces représentations et Morse-Smale de découper cette carte en différentes régions.
+UMAP permet ensuite de cartographier ces représentations et Morse-Smale de
+découper cette carte en différentes régions.
 
-Nous obtenons ainsi une méthode capable d’explorer près de **15 millions de cellules** et de proposer une soixantaine de régions candidates.
+Nous obtenons ainsi une méthode capable d’explorer près de **15 millions de
+cellules** et de proposer une soixantaine de régions candidates.
 
 La prochaine étape est maintenant essentiellement **cytologique et clinique**.
 
-Il faut examiner le contenu de ces clusters avec les cytologistes, vérifier leur stabilité sur d’autres données et déterminer s’ils permettent réellement d’identifier des populations rares, atypiques ou d’intérêt clinique.
+Il faut examiner le contenu de ces clusters avec les cytologistes, vérifier
+leur stabilité sur d’autres données et déterminer s’ils permettent
+réellement d’identifier des populations rares, atypiques ou d’intérêt
+clinique.
 
-L’objectif final n’est donc pas uniquement d’obtenir de bonnes performances informatiques.
+L’objectif final n’est donc pas uniquement d’obtenir de bonnes
+performances informatiques.
 
-L’objectif est de construire un outil qui puisse s’intégrer au parcours réel du laboratoire : depuis la NFS et le déclenchement du frottis jusqu’à l’analyse de l’image, afin de classer plus rapidement et plus fiablement les cellules typiques et d’aider le cytologiste à identifier des cas en projetant les cellules dans l'Umap pour identifier rapidement à quoi celle-ci correspond. 
+L’objectif est de construire un outil qui puisse s’intégrer au parcours
+réel du laboratoire : depuis la NFS et le déclenchement du frottis jusqu’à
+l’analyse de l’image, afin de classer plus rapidement et plus fiablement les
+cellules typiques et d’aider le cytologiste à identifier des cas en projetant
+les cellules dans l'Umap pour identifier rapidement à quoi celle-ci correspond.
 
 Merci pour votre attention.
