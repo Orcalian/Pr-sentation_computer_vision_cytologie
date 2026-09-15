@@ -3,7 +3,7 @@ Je me présente Alexandre Claveau j'ai réaliser mon master a Gustave Roussy. J'
 # Diapositive 1 — Titre
 
 
-Ce travail porte sur **l'analyse des cellules sanguines** par computer vision, réalisé à l’Institut Gustave Roussy, au sein du laboratoire d’hématologie.
+Ce travail porte sur **l'analyse des cellules sanguines** par computer vision, et est réalisé à l’Institut Gustave Roussy, au sein du laboratoire d’hématologie.
 
 ---
 
@@ -37,7 +37,7 @@ Dans ce cas, on réalise un **frottis sanguin**, puis la lame est colorée.
 
 Cette lame peut ensuite être analysée à l’aide d’un **microscope numérique** et scanné.
 
-Le système va rechercher les cellules sur la lame, segmentés et réaliser une clasification de chaque cellules. Cette classification pourra etre validé ou non, d'abords par le technicien et puis en dernière instance par le biologiste.
+Le système va rechercher les cellules sur la lame, segmentés et réaliser une classification de chaque cellules. Cette classification pourra être validé ou non, d'abords par le technicien et puis en dernière instance par le biologiste.
 
 On peut donc résumer toute la chaîne de la manière suivante :
 
@@ -440,9 +440,9 @@ Cela ne permet pas à lui seul de dire que les clusters sont biologiquement corr
 
 Mais cette meilleure organisation de l’espace nous encourage à aller plus loin et à appliquer le clustering.
 
-Il faut ajouter que nous avons découvert que plusieurs classes convergeait vers une zone où la seule caracteristiques commune était les globules rouges. 
+Il faut ajouter que nous avons découvert que plusieurs classes convergeait vers une zone où la seule caractéristique commune était les globules rouges. 
 
-Ce qui nous as ammené a mettre en place le masquage du fong pour obliger le ùmodèle a se concentrer sur les cellules ayant un noyau. 
+Ce qui nous as amené a mettre en place le masquage du fond pour obliger le modèle a se concentrer sur les cellules ayant un noyau. 
 
 ---
 
