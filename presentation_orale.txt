@@ -39,21 +39,21 @@ c’est ce contexte qui motive la suite du projet.
 Gustave Roussy est le centre de référence européen en cancérologie.
 
 Dans le laboratoire d'hématologie, nous réalisons les **numération formule
-sanguine, ou NFS** de l'ensemble des services de l'hôpital. C'est à dire
-environ **350 formules par jour**.
+sanguine** (NFS) de l'ensemble des services de l'hôpital. C'est à dire
+environ **350 NFS par jour**.
 
 Concrètement, les tubes de sang passent d’abord sur une **chaîne
 d’automates Sysmex**, qui réalise la cytométrie. Sur la base de **règles de
-déclenchement** configurer par le service,, une analyse cytologique peut être
-déclenché.
+déclenchement** configurées par le service, une analyse cytologique peut être
+déclenchée.
 
 Dans ce cas, on réalise un **frottis sanguin**, puis la lame est colorée.
 
 Cette lame va ensuite être analysée à l’aide d’un **microscope
-numérique** et scanné.
+numérique** et scannée.
 
 Le système va rechercher les cellules sur la lame, segmenter et réaliser une
-classification de chaque cellules. Cette classification pourra être validé ou
+classification de chaque cellules. Cette classification pourra être validée ou
 non, d'abords par le technicien et puis en dernière instance par le biologiste.
 
 On peut donc résumer toute la chaîne de la manière suivante :
@@ -82,11 +82,11 @@ des populations inhabituelles**.
 Dans notre process, le préclassement est réalisé par le logiciel de
 Cellavision.
 
-Selon Oh Joo Keon dans une étude publié en 2021 dans la revue PLOS ONE, les
+Selon Oh Joo Keon dans une étude publiée en 2021 dans la revue PLOS ONE, les
 niveaux de concordance avec le reclassement des biologistes, est d'environ 89 %.
 
 Résultats qui peuvent baisser, notamment pour les populations cellulaires rares
-et,ou pathologiques. Ce qui est particulièrement pertinent dans un centre comme
+et,ou pathologiques. Ce qui est particulièrement pertinent dans un hôpital comme
 Gustave Roussy, où les traitements reçus par les patients peuvent entraîner
 d’importantes modifications de la cytologie cellulaire.
 
@@ -97,7 +97,7 @@ adaptés à nos propres données.
 
 # Diapositive 6 — Objectifs du projet
 
-À partir de ce constat, nous avons défini deux objectifs.
+À partir de ce constat, nous avons définis deux objectifs.
 
 Le premier concerne la **classification supervisée**.
 
@@ -125,11 +125,11 @@ Avant de développer nos modèles, nous avons regardé ce qui existait dans la
 littérature. Le logiciel de Cellavision utilisant un CNN nous avons commencer
 par explorer l'état de l'art concernant les cnn.
 
-D'après Sohag Kumar Mondal, dans ces résultats puplié en 2025 dans Scientific
+D'après Sohag Kumar Mondal, dans ces résultats pupliés en 2025 dans Scientific
 Reports, utilise un U-Net pour segmenter les cellules, puis un CNN léger pour
 classifier les cellules.
 
-Ils obtiennent environ **97,1 % de F1-score**, sur un dataset composer de neuf
+Ils obtiennent environ **97,1 % de F1-score**, sur un dataset composé de neuf
 types cellulaires.
 
 ---
@@ -206,11 +206,7 @@ un modèle similaires. le but étant que les embeddings convergent.
 
 Dans la deuxième approche, iBOT, on présente l'image globale à un modèle et
 des versions de cette même image ou une partie de l’image est masquée et le
-modèle doit apprendre à prédire les représentations des patches manquants.
-
-À la fin de cet entraînement, nous disposons d’un modèle capable de
-transformer chaque cellule en un vecteur qui résume son information
-cytologique.
+modèle doit apprendre à prédire les représentations des parties manquantes.
 
 ---
 
@@ -222,7 +218,7 @@ Une fois que nous avons les embeddings, il reste encore une question :
 millions de cellules ?**
 
 Une des approches étudiées par Son Le Thanh dans un article datant de 2024 et
-publié dans les actes de la conférence IEEE Topological Data Analysis and
+publiée dans les actes de la conférence IEEE Topological Data Analysis and
 Visualization est le complexe de **Morse-Smale**.
 
 L’idée est de considérer la distribution des cellules comme un paysage de
@@ -302,7 +298,7 @@ d’extraire les embeddings.
 
 # Diapositive 17 — Segmentation
  
-Pour la partie non supervisé, après l'étape d'explorations, nous avons
+Pour la partie non supervisée, après l'étape d'exploration, nous avons
 rajouté une étape de **segmentation**.
 
 Le problème est que l’image contient à la fois la cellule et son
@@ -314,10 +310,10 @@ de la cellule.
 La segmentation permet donc d’isoler la cellule et de mettre le fond
 entièrement noir.
 
-Dans notre pipeline, cette étape est réalisée avec **SAM 4**.
+Dans notre pipeline, cette étape est réalisée avec **Cellpose 4** un vision transformer.
 
 On obtient ainsi une image où le signal utilisé pour produire l’embedding
-provient principalement de la cellule elle-même.
+provient puniquement de la cellule elle-même.
 
 ---
 
@@ -341,7 +337,7 @@ l'avantage de donner une vision générale des résultats de nos modèles.
 
 Nous analysons également les matrices de confusion afin de comprendre
 précisément quelles populations sont confondues et aussi repérer les endroits
-ou le manque de population met rend tout analyse caduques.
+où le manque de population met rend tout analyse caduques.
 
 ---
 
@@ -390,11 +386,6 @@ représente une cellule.
 Cette carte est extrêmement utile pour l’exploration, mais il faut garder à
 l’esprit qu’une projection 2D reste une simplification de l’espace
 initial.
-
-Enfin, nous pouvons mettre en regard la représentation obtenue avec UMAP et
-l’**effective rank**, en faisant l’hypothèse qu’un effective rank plus
-élevé correspond à une meilleure séparation des différents clusters dans
-l’espace UMAP.
 
 ---
 
@@ -595,13 +586,10 @@ modèle avec plus de donné et le masquage du fond.
 Ici, l’exploration porte sur **14,86 millions de cellules**.
 
 Ce changement d’échelle ainsi que le masquage du fond, apporte une meilleur
-séparation des clusters..
+séparation des clusters.
 
 Ce résultat suggère que la représentation stocke désormais des informations
 qui permettent de différencier naturellement les cellules.
-
-Et surtout on voit que la structuration de l'Umap suit la progression de
-l'effective Rank.
 
 ---
 
