@@ -266,18 +266,24 @@ Je vais maintenant présenter les données utilisées et les différentes
 
 # Diapositive 15 — Jeux de données
 
-Nous avons travaillé avec plusieurs  de données.
+Nous avons trois jeu de données, un pour la classification et deux pour l'apprentissage 
+
+Les images en générale sont des images de 368 par 370 pixels en couleur. 
 
 Pour la classification supervisée, nous disposons de **3 570 images
-annotées**, réparties en neuf classes.
+annotées**, réparties en neuf classes. La répartitions a été faite s par les biologistes.
+L'ensemble des images fait 61 mo.
 
 2 856 images sont utilisées pour l’entraînement et 714 pour la validation.
 
-Pour l’exploration des embeddings, nous avons ensuite travaillé sur environ
-**382 000 images**.
+Pour l’exploration des embeddings, nous avons ensuite travaillé sur deux jeux de donnés, 
+un exploratoire et l’autre destiné à la validation des résultats.
 
-Enfin, nous avons appliqué notre approche à très grande échelle sur **14 857
-464 cellules**, soit environ 15 millions d’images.
+Le jeu de données exploratoire est composé d'environ 382 000 images récupéré directement 
+dans le logiciel CellaVision et qui représente 2 ans d'image de 2024 à 2026, soit 7.2 go.
+
+Le jeu de données de validation composé d'environ 15 millions images récupéré directement 
+dans le nas de l'hôpital et qui représente 6 ans d'image de 2020 à 2026, soit 7.2 go.
 
 Cela nous permet de passer d’une problématique classique de classification
 sur quelques milliers d’images à une véritable exploration de population sur
