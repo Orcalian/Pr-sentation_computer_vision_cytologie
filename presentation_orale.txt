@@ -284,7 +284,7 @@ Le jeu de données exploratoire est composé d'environ 382 000 images récupér�
 dans le logiciel CellaVision et qui représente 2 ans d'image de 2024 à 2026, soit 7.2 go.
 
 Le jeu de données de validation composé d'environ 15 millions images récupéré directement 
-dans le nas de l'hôpital et qui représente 6 ans d'image de 2020 à 2026.
+dans le nas de l'hôpital et qui représente 6 ans d'image de 2020 à 2026, soit 286 go.
 
 Cela nous permet de passer d’une problématique classique de classification
 sur quelques milliers d’images à une véritable exploration de population sur
