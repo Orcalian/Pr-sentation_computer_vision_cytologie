@@ -3,8 +3,7 @@
 Madame, Monsieur,
 
 Je vous remercie de me donner l’occasion de vous présenter les dernières
-avancées de
-mes travaux.
+avancées de mes travaux.
 
 Je me présente, je suis Alexandre Claveau. Je suis ingénieur en informatique
 actuellement mon travail porte sur l'analyse des images
@@ -15,15 +14,15 @@ microscopiques de cytologie sanguine assistée par ordinateur.
 
 La présentation est organisée en trois parties.
 
-Je commencerai par le **contexte clinique et l’état de l’art de l'analyse d'images cytologiques**, afin
-d’expliquer d’où viennent les images et pourquoi leur classification
-automatisée est un enjeu.
+Je commencerai par le **contexte clinique et l’état de l’art de l'analyse
+d'images cytologiques**, afin d’expliquer d’où viennent les images et
+pourquoi leur classification automatisée est un enjeu.
 
-Ensuite, je présenterai le **matériel et les méthodes**, avec les données,
+Ensuite, je présenterai le **matériel et les méthodes**, avec les données et
 les algorithmes utilisés.
 
-Enfin, je présenterai les **résultats**, aussi bien pour la classification
-supervisée que pour l’exploration non supervisée.
+Enfin, je vous présenterai mes **résultats**, aussi bien pour la
+classification supervisée que pour l’exploration non supervisée.
 
 ---
 
@@ -39,21 +38,21 @@ c’est ce contexte qui motive la suite du projet.
 Gustave Roussy est le premier centre de référence européen en cancérologie.
 
 Dans le laboratoire d'hématologie, nous réalisons les **numérations-formules
-sanguines** (NFS) de l'ensemble des services de l'hôpital. Cela représente environ 350 NFS par jour.
+sanguines** (NFS) de l'ensemble des services de l'hôpital. Cela représente
+environ 350 NFS par jour.
 
-Concrètement, les tubes de sang passent d’abord sur une **chaîne
+Concrètement, les tubes de sang passent sur une **chaîne
 d’automates Sysmex**, qui réalise la cytométrie. Sur la base de **règles de
 déclenchement** configurées par le service, une analyse cytologique peut être
-déclenchée.
+déclenchée et entrainer la réalisation d'un **frottis sanguin**, puis sa
+coloration.
 
-Dans ce cas, on réalise un **frottis sanguin**, puis la lame est colorée.
+Ce frottis va ensuite être scanné à l’aide d’un **microscope
+numérique**.
 
-Cette lame va ensuite être analysée à l’aide d’un **microscope
-numérique** et scannée.
-
-Le système va rechercher les cellules sur la lame, les segmenter et les classer. 
-Cette classification pourra être validée ou non, d'abord par le technicien, 
-puis en dernière instance, par le biologiste.
+Le système va rechercher les cellules sur la lame, les segmenter et les
+classer. Cette classification pourra être validée ou non, d'abord par le
+technicien, puis en dernière instance, par le biologiste.
 
 On peut donc résumer toute la chaîne de la manière suivante :
 
@@ -84,25 +83,26 @@ Cellavision.
 Selon une étude d’Oh Joo Keon publiée en 2021 dans la revue PLOS ONE, le
 niveau de concordance avec le reclassement des biologistes est d’environ 89 %.
 
-Ce niveau de concordance peut toutefois diminuer, notamment pour les populations 
+Ce niveau de concordance peut toutefois diminuer, notamment pour les populations
 cellulaires rares et/ou pathologiques. Ce qui est particulièrement pertinent 
-dans un hôpital comme Gustave Roussy, où les traitements reçus par les patients 
-peuvent entraîner d’importantes modifications de la cytologie cellulaire.
+dans un hôpital comme Gustave Roussy, où les traitements reçus par les
+patients peuvent entraîner d’importantes modifications de la cytologie
+cellulaire.
 
 On comprend donc pourquoi il reste intéressant de développer des modèles
 adaptés à nos propres données.
 
 ---
 
-# Diapositive 6 — Objectifs du projet
+# Diapositive 6 — Objectifs du projet technique
 
 À partir de ce constat, nous avons défini deux objectifs.
 
 Le premier concerne la **classification supervisée**.
 
-L’idée est d’entraîner un modèle sur des cellules déjà annotées et de
-voir si nous pouvons atteindre, voire dépasser, les performances du logiciel de
-Cellavision.
+L’idée est d’entraîner un modèle sur des cellules déjà annotées et
+d'évaluer si nous pouvons atteindre, voire dépasser, les performances du
+logiciel de Cellavision.
 
 Le deuxième objectif concerne l'exploration cytologique.
 
@@ -121,13 +121,14 @@ catégories classiques utilisées pour la classification supervisée.
 # Diapositive 7 — État de l’art : segmentation et CNN
 
 Avant de développer nos modèles, nous avons regardé ce qui existait dans la
-littérature. Comme le logiciel de CellaVision utilise un CNN, nous avons commencé 
-par explorer l’état de l’art concernant les CNN.
+littérature. Comme le logiciel de CellaVision utilise un CNN, nous avons
+commencé par explorer l’état de l’art concernant les CNN.
 
-Dans une étude publiée en 2025 dans Scientific Reports, Sohag Kumar Mondal utilise 
-un U-Net pour segmenter les cellules, puis un CNN léger pour les classifier.
+Dans une étude publiée en 2025 dans Scientific Reports, Sohag Kumar Mondal
+utilise un U-Net pour segmenter les cellules, puis un CNN léger pour les classifier.
 
-L’étude rapporte un F1-score d’environ 97,1 % sur un jeu de données composé de neuf types cellulaires.
+L’étude rapporte un F1-score d’environ 97,1 % sur un jeu de données
+composé de neuf types cellulaires.
 
 ---
 
@@ -197,11 +198,12 @@ Le principe de l’**apprentissage auto-supervisé** est d’apprendre à
 partir des images elles-mêmes sans avoir besoin de fournir une classe à chaque
 cellule. Les modèles utilisent principalement deux méthodes pour cela.
 
-Dans une approche de type Student–Teacher, on présente l'image globale à un
-modèle et des versions différentes de cette même image (crop, zoom, etc..) à
-un modèle similaire. Le but est que les embeddings convergent.
+Dans une approche de type Student–Teacher, on présente l'image de la cellule à un
+modèle et des variations de cette même image (crop, zoom, etc..) à
+un modèle similaire. Le but est les deux embeddings de ces images soient similaires. 
+Par exemple une image ayant subi une inversion...
 
-Dans la deuxième approche, iBOT, on présente l'image globale à un modèle et
+Dans la deuxième approche, iBOT, on présente l'image complète à un modèle et
 des versions de cette même image où une partie de l’image est masquée et le
 modèle doit apprendre à prédire les représentations des parties manquantes.
 
@@ -209,20 +211,22 @@ modèle doit apprendre à prédire les représentations des parties manquantes.
 
 # Diapositive 12 — Morse-Smale
 
-Une fois que nous avons les embeddings, il reste encore une question :
-
-**comment identifier automatiquement les différents groupes présents dans ces
-millions de cellules ?**
-
-L’une des approches étudiées par Son Le Thanh dans un article datant de 2024 et
-publié dans les actes de la conférence IEEE Topological Data Analysis and
-Visualization est le complexe de **Morse-Smale**.
-
 L’idée est de considérer la distribution des cellules comme un paysage de
 densité.
 
 Certaines zones contiennent beaucoup de cellules et forment des pics de
 densité.
+
+Une fois que nous avons les embeddings, il reste encore une question :
+
+**comment identifier automatiquement les différents groupes présents dans ces
+millions de cellules ?**
+
+L’une des approches étudiées par Son Le Thanh dans un article datant de 2024
+et
+publié dans les actes de la conférence IEEE Topological Data Analysis and
+Visualization est le complexe de **Morse-Smale**.
+
 
 Morse-Smale permet de découper ce paysage en différentes régions autour de
 ces pics.
@@ -262,7 +266,7 @@ Je vais maintenant présenter les données utilisées et les différentes
 
 # Diapositive 15 — Jeux de données
 
-Nous avons travaillé avec plusieurs échelles de données.
+Nous avons travaillé avec plusieurs  de données.
 
 Pour la classification supervisée, nous disposons de **3 570 images
 annotées**, réparties en neuf classes.
@@ -307,7 +311,7 @@ de la cellule.
 La segmentation permet donc d’isoler la cellule et de mettre le fond
 entièrement noir.
 
-Dans notre pipeline, cette étape est réalisée avec Cellpose 4, qui repose sur 
+Dans notre pipeline, cette étape est réalisée avec Cellpose 4, qui repose sur
 une architecture de type Vision Transformer.
 
 Nous obtenons ainsi une image où le signal utilisé pour produire l’embedding
@@ -321,7 +325,7 @@ Pour évaluer la classification, nous utilisons plusieurs métriques.
 
 L'accuracy nous indique la proportion totale de prédictions correctes.
 
-Mais lorsqu’une population est rare, une bonne accuracy  peut masquer
+Mais lorsqu’une population est rare, une bonne accuracy peut masquer
 de mauvaises performances sur cette population.
 
 Nous regardons donc également le **recall**, qui mesure la capacité du modèle
@@ -335,7 +339,8 @@ l'avantage de donner une vision générale des résultats de nos modèles.
 
 Nous analysons également les matrices de confusion afin de comprendre 
 précisément quelles populations sont confondues et de repérer les situations 
-où le faible nombre d’exemples dans certaines populations rend toute analyse caduque.
+où le faible nombre d’exemples dans certaines populations rend toute analyse
+caduque.
 
 ---
 
@@ -368,8 +373,10 @@ dimensions.
 
 Il est donc impossible de les visualiser directement.
 
-Nous utilisons pour cela **UMAP**. L'UMAP est une méthode qui permet de produire 
-une représentation en deux dimensions à partir d’une représentation initiale en 2 048 dimensions.
+Nous utilisons pour cela **UMAP**. L'UMAP est une méthode qui permet de
+produire
+une représentation en deux dimensions à partir d’une représentation
+initiale en 2 048 dimensions.
 
 UMAP cherche principalement à préserver les voisinages locaux.
 
@@ -377,7 +384,8 @@ Autrement dit, si deux cellules sont proches dans l’espace des embeddings,
 UMAP va essayer de les maintenir proches dans la représentation en deux
 dimensions.
 
-L'autre intérêt de l'UMAP est de prendre en compte les différences de densité
+L'autre intérêt de l'UMAP est de prendre en compte les différences de
+densité
 dans un même espace. On obtient finalement une carte où chaque point
 représente une cellule.
 
@@ -444,7 +452,8 @@ l’exploration des embeddings.
 Pour les modèles supervisés, ResNet-50 a été entraîné sur une A100, avec
 un temps de calcul d’environ 30 minutes.
 
-Le ViT-B/16 a été entraîné sur une H100 et le temps de calcul est d’environ deux minutes.
+Le ViT-B/16 a été entraîné sur une H100 et le temps de calcul est
+d’environ deux minutes.
 
 Ces différences sont à interpréter en tenant compte des configurations
 utilisées, notamment des tailles de batch.
@@ -567,7 +576,8 @@ Avec DINOv3, la situation devient plus intéressante.
 Visuellement, plusieurs populations occupent des zones plus distinctes et
 l’organisation générale de la carte paraît plus structurée.
 
-Il faut ajouter que nous avons découvert que plusieurs classes convergeaient vers
+Il faut ajouter que nous avons découvert que plusieurs classes convergeaient
+vers
 une zone où la seule caractéristique commune était les globules rouges.
 
 Cela nous a amenés à mettre en place le masquage du fond pour obliger le
@@ -620,7 +630,8 @@ avec 98,26 % de F1-score.
 Sur la partie non supervisée, DINOv3 produit une représentation plus
 structurée avec des clusters mieux séparés que celle obtenue avec DINOv2.
 
-Cette modification de la représentation s’accompagne d’une augmentation de l’effective rank.
+Cette modification de la représentation s’accompagne d’une augmentation de
+l’effective rank.
 
 Le clustering Morse-Smale permet ensuite de réduire cette immense quantité
 de données à environ 60 régions candidates.
@@ -658,10 +669,14 @@ clinique.
 L’objectif final n’est donc pas uniquement d’obtenir de bonnes
 performances informatiques.
 
-L’objectif est de construire un outil qui puisse s’intégrer au parcours réel du laboratoire, 
-depuis la NFS et le déclenchement du frottis jusqu’à l’analyse de l’image, afin de classer 
-plus rapidement et plus fiablement les cellules typiques et d’aider le cytologiste à identifier 
-les cas atypiques, notamment en projetant les cellules dans l’UMAP pour déterminer rapidement à 
+L’objectif est de construire un outil qui puisse s’intégrer au parcours
+réel du laboratoire,
+depuis la NFS et le déclenchement du frottis jusqu’à l’analyse de
+l’image, afin de classer
+plus rapidement et plus fiablement les cellules typiques et d’aider le
+cytologiste à identifier
+les cas atypiques, notamment en projetant les cellules dans l’UMAP pour
+déterminer rapidement à
 quelles populations elles correspondent.
 
 Merci pour votre attention.
