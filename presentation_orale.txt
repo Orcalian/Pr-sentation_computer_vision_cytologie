@@ -200,12 +200,13 @@ cellule. Les modèles utilisent principalement deux méthodes pour cela.
 
 Dans une approche de type Student–Teacher, on présente l'image de la cellule à un
 modèle et des variations de cette même image (crop, zoom, etc..) à
-un modèle similaire. Le but est les deux embeddings de ces images soient similaires. 
-Par exemple une image ayant subi une inversion...
+un modèle similaire. Le but est que les deux embeddings de ces images soient similaires. 
+Par exemple une image ayant subi une inversion doit donner le même embedding que l'image d'origine.
+De la même façon une image dont certaines parties ont été masqué doit donné le même embedding que
+l'image complète.
 
-Dans la deuxième approche, iBOT, on présente l'image complète à un modèle et
-des versions de cette même image où une partie de l’image est masquée et le
-modèle doit apprendre à prédire les représentations des parties manquantes.
+L'idée derrière cette entrainement est que le modèle fournisse une représentation numérique de l'image (embedding)
+invariante. Et cela même si l'image présenté a subi des variations. 
 
 ---
 
@@ -283,7 +284,7 @@ Le jeu de données exploratoire est composé d'environ 382 000 images récupér�
 dans le logiciel CellaVision et qui représente 2 ans d'image de 2024 à 2026, soit 7.2 go.
 
 Le jeu de données de validation composé d'environ 15 millions images récupéré directement 
-dans le nas de l'hôpital et qui représente 6 ans d'image de 2020 à 2026, soit 7.2 go.
+dans le nas de l'hôpital et qui représente 6 ans d'image de 2020 à 2026.
 
 Cela nous permet de passer d’une problématique classique de classification
 sur quelques milliers d’images à une véritable exploration de population sur
@@ -586,8 +587,8 @@ Il faut ajouter que nous avons découvert que plusieurs classes convergeaient
 vers
 une zone où la seule caractéristique commune était les globules rouges.
 
-Cela nous a amenés à mettre en place le masquage du fond pour obliger le
-modèle à se concentrer sur les cellules ayant un noyau.
+Cela nous a amenés à mettre en place la segmentation de la cellule pour masquer 
+le fond et obliger le modèle à se concentrer sur les cellules ayant un noyau.
 
 Cette meilleure organisation de l’espace nous encourage à réentraîner 
 le modèle avec davantage de données et en appliquant le masquage du fond.
